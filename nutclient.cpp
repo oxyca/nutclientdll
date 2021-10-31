@@ -125,7 +125,9 @@ TimeoutException::~TimeoutException() {}
 namespace internal
 {
 
-
+#ifdef WIN32
+    static bool WSAInitialised = false;
+#endif
 
 /**
  * Internal socket wrapper.
@@ -133,6 +135,32 @@ namespace internal
  *
  * Implemented as separate internal class to easily hide plateform specificities.
  */
+
+#ifdef WIN32
+#define FD_TYPE SOCKET
+inline int xread(FD_TYPE socket, char * buf, int size) {
+    return recv(socket, buf, size, 0);
+}
+inline int xwrite(FD_TYPE socket, const char * buf, int size) {
+    return send(socket, buf, size, 0);
+}
+inline int xclose(FD_TYPE socket) {
+    return ::closesocket(socket);
+}
+#endif
+#ifndef WIN32
+#define FD_TYPE int
+inline int xread(FD_TYPE socket, char * buf, int size) {
+    return ::read(socket, buf, size);
+}
+inline int xwrite(FD_TYPE socket, const char * buf, int size) {
+    return ::write(socket, buf, size);
+}
+inline int xclose(FD_TYPE socket) {
+    return ::close(socket);
+}
+#endif
+
 class Socket
 {
 public:
@@ -179,7 +207,7 @@ void Socket::setTimeout(long timeout)
 
 void Socket::connect(const std::string& host, int port)
 {
-	int	sock_fd;
+	FD_TYPE sock_fd;
 	struct addrinfo	hints, *res, *ai;
 	char			sport[NI_MAXSERV];
 	int			v;
@@ -193,6 +221,16 @@ void Socket::connect(const std::string& host, int port)
 	if (host.empty()) {
 		throw nut::UnknownHostException();
 	}
+
+#ifdef WIN32
+    if (!WSAInitialised) {
+        WSADATA wsaData;
+        auto iResult = WSAStartup(MAKEWORD(2,0), &wsaData);
+        if (iResult == 0) {
+            WSAInitialised = true;
+        }
+    }
+#endif
 
 	snprintf(sport, sizeof(sport), "%hu", static_cast<unsigned short int>(port));
 
@@ -290,7 +328,7 @@ void Socket::connect(const std::string& host, int port)
 		}
 
 		if (v < 0) {
-			close(sock_fd);
+			xclose(sock_fd);
 			continue;
 		}
 
@@ -376,7 +414,7 @@ size_t Socket::read(void* buf, size_t sz)
 		}
 	}
 
-	ssize_t res = ::read(_sock, buf, sz);
+	ssize_t res = xread(_sock, static_cast<char *>(buf), sz);
 	if(res==-1)
 	{
 		disconnect();
@@ -403,7 +441,7 @@ size_t Socket::write(const void* buf, size_t sz)
 		}
 	}
 
-	ssize_t res = ::write(_sock, buf, sz);
+	ssize_t res = xwrite(_sock, static_cast<const char *>(buf), sz);
 	if(res==-1)
 	{
 		disconnect();
