@@ -42,12 +42,25 @@ namespace internal
 class Socket;
 } /* namespace internal */
 
-
-class Client;
-class TcpClient;
-class Device;
-class Variable;
-class Command;
+#ifdef WIN32_EXPORT
+class __declspec(dllexport) Client;
+class __declspec(dllexport) TcpClient;
+class __declspec(dllexport) Device;
+class __declspec(dllexport) Variable;
+class __declspec(dllexport) Command;
+class __declspec(dllexport) NutException;
+class __declspec(dllexport) SystemException;
+class __declspec(dllexport) IOException;
+class __declspec(dllexport) UnknownHostException;
+class __declspec(dllexport) NotConnectedException;
+#endif
+#ifndef WIN32_EXPORT
+    class Client;
+    class TcpClient;
+    class Device;
+    class Variable;
+    class Command;
+#endif
 
 /**
  * Basic nut exception.
