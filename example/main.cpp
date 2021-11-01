@@ -34,5 +34,8 @@ int main(int argc, char * argv[])
             }
         }
     }
+#ifdef WIN32
+    freeWinsock();
+#endif
     exit(0);
 }

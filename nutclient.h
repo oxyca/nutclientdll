@@ -53,6 +53,8 @@ class __declspec(dllexport) SystemException;
 class __declspec(dllexport) IOException;
 class __declspec(dllexport) UnknownHostException;
 class __declspec(dllexport) NotConnectedException;
+__declspec(dllexport) void __cdecl freeWinsock();
+
 #endif
 #ifndef WIN32_EXPORT
     class Client;
@@ -60,6 +62,9 @@ class __declspec(dllexport) NotConnectedException;
     class Device;
     class Variable;
     class Command;
+#ifdef WIN32
+    __declspec(dllimport) void __cdecl freeWinsock();
+#endif
 #endif
 
 /**

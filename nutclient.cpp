@@ -121,7 +121,6 @@ UnknownHostException::~UnknownHostException() {}
 NotConnectedException::~NotConnectedException() {}
 TimeoutException::~TimeoutException() {}
 
-
 namespace internal
 {
 
@@ -481,6 +480,8 @@ std::string Socket::read()
 	}
 }
 
+
+
 void Socket::write(const std::string& str)
 {
 //	write(str.c_str(), str.size());
@@ -492,6 +493,15 @@ void Socket::write(const std::string& str)
 }/* namespace internal */
 
 
+#ifdef WIN32_EXPORT
+__declspec(dllexport) void __cdecl freeWinsock()
+{
+        if (internal::WSAInitialised) {
+            WSACleanup();
+            internal::WSAInitialised = false;
+        }
+}
+#endif
 /*
  *
  * Client implementation
