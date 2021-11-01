@@ -19,20 +19,26 @@ int main(int argc, char * argv[])
     }
     auto host = string(argv[1]);
     auto port = stoi(argv[2]);
-    std::unique_ptr<Client> client(new TcpClient(host, port));
-    auto devices = client->getDeviceNames();
-    for(const auto & device : devices) {
-        cout << device << endl;
-        if (!devices.empty()) {
-            auto variables = client->getDeviceVariableNames(device);
-            for (const auto & variable: variables) {
-                auto value = client->getDeviceVariableValue(device, variable);
-                cout << '\t' << variable << ": ";
-                for (const auto &v :value)
-                    cout << v << '\t';
-                cout << endl;
+    try {
+        std::unique_ptr<Client> client(new TcpClient(host, port));
+        auto devices = client->getDeviceNames();
+        for (const auto &device: devices) {
+            cout << device << endl;
+            if (!devices.empty()) {
+                auto variables = client->getDeviceVariableNames(device);
+                for (const auto &variable: variables) {
+                    auto value = client->getDeviceVariableValue(device, variable);
+                    cout << '\t' << variable << ": ";
+                    for (const auto &v: value)
+                        cout << v << '\t';
+                    cout << endl;
+                }
             }
         }
+    } catch (const UnknownHostException &e) {
+        cout << "Unknown host" << endl;
+    } catch (const NutException & e) {
+        cout << e.what() << endl;
     }
 #ifdef WIN32
     freeWinsock();
