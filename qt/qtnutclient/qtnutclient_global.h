@@ -1,0 +1,12 @@
+#ifndef QTNUTCLIENT_GLOBAL_H
+#define QTNUTCLIENT_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(QTNUTCLIENT_LIBRARY)
+#  define QTNUTCLIENT_EXPORT Q_DECL_EXPORT
+#else
+#  define QTNUTCLIENT_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // QTNUTCLIENT_GLOBAL_H
